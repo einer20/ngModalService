@@ -1,45 +1,38 @@
 
 /*
-	Creates a modal dialog and provides events for manipulating the modal.
+  Creates a modal dialog and provides events for manipulating the modal.
 
-  Simple usage: 
-
-  ngModalService({
-     controller:ModalTestController,
-     template:"<p>You have recived a new messsage!: {{message}}</p>",
-     showFooter:true,
-   });
-
-   function ModalTestController($scope, $modalReference){
-      $scope.message = "Hi! Im a alien!";
-   }
-   
   made with love by @einersantanar
 */
 var ngModalServiceModule = angular.module("ngModalServiceModule",[]);
 
 ngModalServiceModule.service("ngModalService",["$document", "$rootScope","$controller", "$compile", "$http", function($document, $rootScope, $controller, $compile,$http){
   
-  var defaultOptions = {
-    maximize : false,
-    showFooter : true,
-    title : "Content",
-    size: 'normal'
-  };
-
   var NORMAL_SIZE = "normal", MAX_SIZE = "large", MINIMUN_SIZE = "mini";
+
+  var defaultOptions = {
+    // indicates if show the footer or not
+    showFooter : true,
+
+    // set the modal title
+    title : "Content",
+
+    // set the modal size. Max size is 1020px
+    size: NORMAL_SIZE
+  };
       
   var utilities = {
-  	/*
-		centers the given view in the middle of the screen
-  	*/
+
+    // centers the given view in the middle of the screen
+    // see: https://css-tricks.com/snippets/css/exactly-center-an-imagediv-horizontally-and-vertically/
     centerHtml:function (html) {
         html.css("margin-left", ((html.width() * -1) / 2).toString() + "px");
     }
+
   };
 
   /*
-	* Bind the scope to the modal and controller if set and append the modal to the DOM
+  * Bind the scope to the modal and controller if set and append the modal to the DOM
   */
   function bind($template, bodyTemplate, scope, controller) {
 
@@ -55,7 +48,7 @@ ngModalServiceModule.service("ngModalService",["$document", "$rootScope","$contr
 
           if(scope.modal.destroy.toString().indexOf("non-overrididable") == -1)
           {
-          	throw new Error("You cannot override the method modal.destroy");
+            throw new Error("You cannot override the method modal.destroy");
           }
 
      }
@@ -116,7 +109,7 @@ ngModalServiceModule.service("ngModalService",["$document", "$rootScope","$contr
      
      // destroy the modal from the DOM
      scope.modal.destroy = function(){
-     	  // non-overrididable
+        // non-overrididable
         $template.fadeOut(function  () {
           $template.remove();
         });
@@ -125,21 +118,21 @@ ngModalServiceModule.service("ngModalService",["$document", "$rootScope","$contr
 
      switch(options.size)
      {
-       	case MINIMUN_SIZE:
-       		$template.css("width","400px");
-       	break;
-       	case NORMAL_SIZE:
-  			 // the css already contains the normal size :)
-       	break;
-       	case MAX_SIZE:
-       		$template.css("width","1020px");
-       	break;
+        case MINIMUN_SIZE:
+          $template.css("width","400px");
+        break;
+        case NORMAL_SIZE:
+         // the css already contains the normal size :)
+        break;
+        case MAX_SIZE:
+          $template.css("width","1020px");
+        break;
      }
      
      if(options.templateUrl)
      {
 
-     	  var templateUrl = options.templateUrl;
+        var templateUrl = options.templateUrl;
         if(options.templateUrl.indexOf("~")){
           // append the site base url
           var basePath = location.host + location.pathname;
@@ -165,7 +158,7 @@ ngModalServiceModule.service("ngModalService",["$document", "$rootScope","$contr
 
      else if (options.template) {
         var $bodyTemplate = angular.element(options.template);
-      	$template.find("ng-modal-body").html($bodyTemplate);
+        $template.find("ng-modal-body").html($bodyTemplate);
         bind($template, $bodyTemplate, scope, options.controller);
      }
 
