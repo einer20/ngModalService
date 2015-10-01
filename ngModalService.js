@@ -1,7 +1,21 @@
 
 
 /*
-	Creates a modal dialog
+	Creates a modal dialog and provides events for manipulating the modal.
+
+  Simple usage: 
+
+  ngModalService({
+     controller:ModalTestController,
+     template:"<p>You have recived a new messsage!: {{message}}</p>",
+     showFooter:true,
+   });
+
+   function ModalTestController($scope, $modalReference){
+      $scope.message = "Hi! Im a alien!";
+   }
+   
+  made with love by @einersantanar
 */
 angular.module("",[]).service("ngModalService",["$document", "$rootScope","$controller", "$compile", "$http", function($document, $rootScope, $controller, $compile,$http){
   
@@ -102,7 +116,7 @@ angular.module("",[]).service("ngModalService",["$document", "$rootScope","$cont
      if(options.templateUrl){
 
         if(templateUrl.indexOf("~")){
-          // append the side base url
+          // append the site base url
           var basePath = location.host + location.pathname;
           templateUrl = templateUrl.replace("~", basePath);
         }
