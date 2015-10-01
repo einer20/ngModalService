@@ -3,22 +3,27 @@
 /*
 	Creates a modal dialog
 */
-angular.module("",[]).service("ngModalService",["$document", "$rootScope","$controller", "compile", "$http", 
-	function($document, $rootScope, $controller, $compile,$http){
+angular.module("",[]).service("ngModalService",["$document", "$rootScope","$controller", "$compile", "$http", function($document, $rootScope, $controller, $compile,$http){
   
-	var defaultOptions = {
+  var defaultOptions = {
+    maximize : false,
+    showFooter : false,
+    title : "Content",
+  };
+      
 
-		maximize : false,
-		showFooter : false,
-		title : "Content",
-		css: {},
-	};
+  var utilities = {
+    centerContent:function (htmlTemplate) {
+      
+    }
+  };
+      
 
-  return ngModalService(options){
+  return function ngModalService(options){
 
-  	options = angular.extend(defaultOptions, options);
+    options = angular.extend(defaultOptions, options);
 
-  	var modalTemplateString = '<div class="ng-modal">' +
+    var modalTemplateString = '<div class="ng-modal">' +
                               '<div class="ng-modal-dialog">' +
                                 '<div class="ng-modal-content">' +
                                   '<div class="ng-modal-header">' +
@@ -32,8 +37,8 @@ angular.module("",[]).service("ngModalService",["$document", "$rootScope","$cont
                                    //'<div style="display:block;z-index:-1"> </div>' +
                                     '<div class="ng-modal-footer">' +
                                      '<div class="ng-modal-footer-wrapper">' +
-                                      '<button type="button" ng-click="modal.cancelPressed()"></button>' +
-                                      '<button type="button" ng-click="modal.acceptPressed()"></button>' +
+                                      '<button type="button" ng-click="modal.cancelPressed()">Cancel</button>' +
+                                      '<button type="button" ng-click="modal.acceptPressed()">Continue</button>' +
                                     '</div>' +
                                     '</div>' +
                                    '</div>' +
@@ -43,62 +48,89 @@ angular.module("",[]).service("ngModalService",["$document", "$rootScope","$cont
 
      var $template = angular.element(modalTemplateString);
      var scope = $rootScope.$new();
+     scope.$$template = $template;
 
      // appling the configuration to the modal
      $template.find(".ng-modal-title").text(options.title);
 
      if(!options.showFooter)
-     		$template.find(".ng-modal-footer").hide();
+        $template.find(".ng-modal-footer").hide();
 
 
     // creating the default events
      scope.modal = {};
 
-     if(!options.cancelPressed)
-     {
-	     // executes when the user press the cancel buttom
-	     scope.modal.cancelPressed = function(){
+     
+    // default events  implementation
+    
+    scope.modal.cancelPressed = function () {
+      $template.fadeOut(function  () {
+        $template.remove();
+      });
+    };
 
-	     };
-     }
-
-     if(!options.acceptPressed)
-     {
-	     // executes when the user press the accept buttom
-	     scope.modal.acceptPressed = function(){
-
-	     };
-     }
-
+    
+    scope.modal.acceptPressed = function () {
+      $template.fadeOut(function  () {
+        $template.remove();
+      });
+    };
+     
      // destroy the modal from the DOM
      scope.modal.destroy = function(){
-
+        $template.fadeOut(function  () {
+          $template.remove();
+        });
      };
 
-     scope.modal.maximize = function(){
+     function bind(bodyTemplate, scope, controller) {
 
+          if(controller){
+              $controller(controller, { $scope: scope, modalReference: $template});
+          }
+       
+          $template.find(".ng-modal-body").append(bodyTemplate);
+       
+          $compile($template)(scope);
+          if(options.getView) options.getView($template, scope);
 
-     };
+          utilities.centerContent($template);        
+          $document.find("body").append($template);
+     }
+
 
      if(options.templateUrl){
 
+        if(templateUrl.indexOf("~")){
+          // append the side base url
+          var basePath = location.host + location.pathname;
+          templateUrl = templateUrl.replace("~", basePath);
+        }
 
+        var useHttpPostMethod = templateUrl.indexOf("post:") !== -1;
 
+        if(useHttpPostMethod){
+          templateUrl = templateUrl.replace("post:",'');
+        }else{
+          templateUrl = templateUrl.replace("get:",'');
+        }
 
+        var httpMethod = useHttpPostMethod ? $http.post : $http.get;
+
+        httpMethod(templateUrl).then(function (response) {
+            var $bodyTemplate = angular.element(response.data );
+
+            bind($bodyTemplate, scope, options.controller);
+        });
+
+     }else if (options.template) {
+
+        var $bodyTemplate = angular.element(options.template);
+      $template.find("ng-modal-body").html($bodyTemplate);
+       
+        bind($bodyTemplate, scope, options.controller);
      }
-     else if (options.template) {
-     	$template.find("ng-modal-body").html(options.template);
-     }
 
-
-
-
-
-     if (options.getModal) {
-     	options.getModal($template,scope);
-     }
-
-  }
+  };
 
 }]);
-
